@@ -1,0 +1,34 @@
+project:
+  type: book
+
+book:
+  title: "Teste de Hipóteses Assintóticos - Beta(alpha,1)"
+  author: "Gustavo Almeida Silva"
+
+  page-footer:
+    left: |
+      Teste de Hipóteses Assintóticos - Beta(alpha,1) foi escrito por Gustavo Almeida Silva
+    right: |
+      Esse livro foi feito com <a href="https://quarto.org/">Quarto</a>.
+  cover-image: cover.png
+  favicon: cover.png
+  
+  chapters:
+    - index.qmd
+    - intro.qmd
+    
+    - part: summary.qmd
+      chapters:
+    
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+pdf:
+    documentclass: scrreport
+
+
+

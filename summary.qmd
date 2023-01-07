@@ -1,0 +1,88 @@
+# Simulação Computacional dos testes
+
+Trabalhou-se com valores de $\theta$ como escalar e como vetor em determinados momentos. Para o seu uso escalar fixou-se o valor $1$, ja para $\theta$
+vetor fixou-se os valores $(1,5,10,50)$ $\~{\theta}$
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+beta_llhd_function=function(data,theta){
+  n_size=length(data)
+  
+  out_sum=n_size*log(theta)
+  in_sum=(theta-1)*log(data)%>%
+          sum()
+  
+  joint=out_sum+in_sum
+  
+  return(joint)
+}
+
+```
+
+
+```{r}
+beta_shape1_mle=function(data){
+  n_size=length(data)
+  numerator=-n_size
+  denominator=log(data)%>%
+                sum()
+  
+  return(numerator/denominator)
+}
+
+```
+
+
+E.M.V para diferentes tamanhos amostrais
+
+```{r}
+n_size_vector=c(10, 50, 100, 500, 1000, 5000, 10000)
+
+
+mles=sapply(seq_along(n_size_vector),function(i){
+    replicate(100,rbeta(n=n_size_vector[i],shape1 = 2,shape2 = 1))%>%
+    apply(2,beta_shape1_mle)%>%
+    mean()%>%
+    return()
+  }
+)
+
+
+
+
+```
+
+
+
+## Teste de Verossimilhança
+
+```{r}
+llhood_ratio_test=function(H_0,data){
+  theta_hat=beta_shape1_mle(data)
+  ll_theta_hat=beta_llhd_function(data,theta_hat)
+  
+  ll_theta_0=beta_llhd_function(data,H_0)
+  
+  llhood_value=2*(ll_theta_hat-ll_theta_0)
+  return(llhood_value)
+}
+
+```
+
+
+
+```{r}
+sapply(seq_along(n_size_vector),function(i){
+    replicate(100,rbeta(n=n_size_vector[i],shape1 = 2,shape2 = 1))%>%
+    apply(2,beta_shape1_mle)%>%
+    mean()%>%
+    return()
+  }
+)
+
+```
+

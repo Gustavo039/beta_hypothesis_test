@@ -1,0 +1,9 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Teste de Hipóteses Assintóticos - Beta(alpha,1)",
+    "section": "",
+    "text": "Testes Assintóticos\nUm dos objetivos da inferência estatística consiste em fazer deduções acerca do modelo estatístico gerador dos dados observados, o que geralmente é feito, no caso paramétrico, com respeito a uma quantidade θ (podendo ser um escalar ou um vetor). Além da fase relacionada a estimativas pontuais e intervalares, frequentemente, tal interesse baseia-se em avaliar o quão plausível é a hipótese de que o parâmetro θ pertença a um determinado subconjunto do espaço paramétrico (conjunto de todos os valores possíveis para θ). Esse procedimento é uma das vertentes da inferência estatística, e é chamado de teste de hipóteses. Na literatura, existem algumas propostas de métodos para se testar hipóteses, como por exemplo, o lema de Neyman-Pearson que nos fornece testes com propriedades ótimas. Contudo, o uso desses testes nem sempre é possível. Dificuldades relacionadas com o modelo adotado, ou com as hipóteses consideradas complexas ou até mesmo com a álgebra das estatísticas do teste tornam esse processo bastante trabalhoso. Uma opção muito conhecida e propagada é uso de testes assintóticos. Entre os testes assintóticos, destacam-se três, sendo, esses: Teste da Razão de Verossimilhanças generalizado, Teste de Wald e o Teste Score. Em casos regulares, essas três estatísticas são assintoticamente equivalentes sob a hipótese nula, onde seguem uma distribuição \\(X^2_1\\). Neste trabalho, com intuito de comparar a eficácia dos testes assintóticos, foi realizado uma exposição teórica do assunto e estudos de simulação em que foram avaliados a taxa de rejeição e poder empírico sob tamanho de amostras diferentes.\nPara isso foi escolhida a distribuição \\(Beta(\\alpha,1)\\), e o seguinte vetor de tamanhos amostrais \\((n=10, 50, 100, 500, 1000, 5000, 10000)\\)"
+  }
+]
