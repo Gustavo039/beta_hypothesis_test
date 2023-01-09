@@ -1,0 +1,49 @@
+--- 
+toc-title: Conteúdo
+---
+
+# Teste Escore
+
+
+```{r,echo=F,warning=FALSE,message=F}
+library(tidyverse)
+library(kableExtra)
+```
+
+
+```{r, echo=FALSE}
+beta_llhd_function=function(data,alpha){
+  n_size=length(data)
+  
+  out_sum=n_size*log(alpha)
+  in_sum=(alpha-1)*log(data)%>%
+          sum()
+  
+  joint=out_sum+in_sum
+  
+  return(joint)
+}
+
+beta_shape1_mle=function(data){
+  n_size=length(data)
+  numerator=-n_size
+  denominator=log(data)%>%
+                sum()
+  
+  return(numerator/denominator)
+}
+
+
+```
+
+```{r}
+n_size_vector=c(10, 50, 100, 500, 1000, 5000, 10000)
+alpha=5
+alpha_vector=seq(2,8,by=0.2)
+```
+
+
+
+
+
+

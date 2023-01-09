@@ -1,0 +1,201 @@
+--- 
+toc-title: Conteúdo
+---
+
+# Teste Wald
+
+## Conceito e forma teórica
+
+O teste avalia restrições em parâmetros estatísticos com base na distância ponderada entre a estimativa irrestrita e seu valor hipotético sob a hipótese nula, onde o peso é a precisão da estimativa. Intuitivamente, quanto maior essa distância ponderada, menos provável é que a restrição seja verdadeira. Embora as distribuições de amostras finitas dos testes de Wald sejam geralmente desconhecidas, ele tem uma distribuição $X^2$ assintótica sob a hipótese nula, um fato que pode ser usado para determinar a significância estatística.
+
+A estatísca de teste é dada por:
+
+$$\frac{\sqrt{n}(\hat\theta-\theta_0)}{\sqrt{I_f(\theta)^{-1}}}\sim_{n\to\infty} X^2_1$$
+
+Onde, no caso do modelo $Beta(\alpha,1)$, a estatísca do teste possui a seguinte forma:
+
+$$\frac{\sqrt{n}(\hat\alpha-\alpha_0)}{\sqrt{\frac{\hat\alpha^2}{n}}}$$
+
+
+## Avaliação computacional
+
+```{r,echo=F,warning=FALSE,message=F}
+library(tidyverse)
+library(kableExtra)
+```
+
+
+```{r, echo=FALSE}
+beta_llhd_function=function(data,alpha){
+  n_size=length(data)
+  
+  out_sum=n_size*log(alpha)
+  in_sum=(alpha-1)*log(data)%>%
+          sum()
+  
+  joint=out_sum+in_sum
+  
+  return(joint)
+}
+
+beta_shape1_mle=function(data){
+  n_size=length(data)
+  numerator=-n_size
+  denominator=log(data)%>%
+                sum()
+  
+  return(numerator/denominator)
+}
+
+
+```
+
+```{r}
+n_size_vector=c(10, 50, 100, 500, 1000, 5000, 10000)
+alpha=5
+alpha_vector=seq(2,8,by=0.2)
+```
+
+
+
+```{r}
+wald_test=function(data,H_0){
+  alpha_hat=beta_shape1_mle(data)
+  fisher_information=1/(alpha_hat^2)
+  
+  w_value=(((alpha_hat-H_0)*sqrt(length(data)))/sqrt(1/fisher_information))^2
+  
+  return(w_value)
+}
+
+
+```
+
+
+### Poder do teste
+
+```{r}
+
+power_decision=function(x){
+  return(ifelse(x>qchisq(0.975,1) | x<qchisq(0.025,1) ,1,0))
+}
+
+wald_power=sapply(seq_along(n_size_vector),function(i){
+  wald_power_step=sapply(seq_along(alpha_vector),function(k){replicate(400,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
+    apply(2,wald_test,alpha)%>%
+    unlist()%>%
+    sapply(power_decision)%>%
+    sum()/400}
+)
+  return(wald_power_step)
+
+})
+
+tbl_wald_power=as_tibble(wald_power)%>%
+                 rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_wald_power_step=tbl_wald_power%>%
+  pivot_longer(cols = everything())
+
+
+
+
+index=sapply(seq_along(alpha_vector),function(i){
+      rep(alpha_vector[i],7)
+      })%>%
+      as_tibble()%>%
+      pivot_longer(cols = everything())%>%
+      arrange(value)
+
+pivot_wald_power=cbind(pivot_wald_power_step,index$value)%>%
+                    rename('index'='index$value')
+  
+
+ggplot(pivot_wald_power, aes(x=index, y=value)) +
+  geom_line(linetype=1,linewidth=1.05,color='#FC9B5C')+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+```
+
+
+```{r}
+df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
+df_power_wald_print=tbl_wald_power[c(1,6,11,14,15,16,17,18,21,26,31),]
+    
+df=cbind(alpha=df_alpha,df_power_wald_print)%>%
+  rename('$\\alpha$'=alpha)
+
+
+df %>%
+  kbl(caption = 'Poder em Diferentes Tamanhos Amostrais, $\\alpha$ verdadeiro = 5') %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+### Distribuição Qui-Quadrado assintótica
+
+
+```{r}
+chi_genarate_wald=sapply(seq_along(n_size_vector),function(i){
+    gen_samples=replicate(5000,rbeta(n=n_size_vector[i],shape1 = alpha,shape2 = 1))
+    apply(gen_samples, 2, wald_test,5)%>%
+      return()
+  }
+)
+
+
+
+tbl_chi_genarate_wald=as_tibble(chi_genarate_wald)%>%
+  rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_chi_genarate_wald=tbl_chi_genarate_wald%>%
+  pivot_longer(cols = everything())
+
+
+
+
+pivot_chi_genarate_wald%>% 
+  ggplot(aes(x = value)) + 
+  geom_histogram(aes(y =after_stat(density)),color='black',fill='#FC9B5C')+
+  stat_function(fun = dchisq, args = list(df=1),color='#FA9BEB')+ 
+  ylim(c(0,1))+
+  xlim(c(0,10))+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+
+
+```
+
+
+```{r}
+
+pivot_chi_genarate_wald%>% 
+  ggplot(aes(x = value)) + 
+  stat_ecdf(geom = "step",color='#FC9B5C')+
+  stat_function(fun = pchisq, args = list(df=1),color='#FA9BEB')+ 
+  facet_wrap(~name)+
+  theme_dark()
+
+
+```
+
+
+```{r}
+
+  k=sapply(seq_along(n_size_vector),function(i){
+     ks.test(tbl_chi_genarate_wald[,i],'pchisq',1)$p.value
+  })
+
+
+  
+df=data.frame(N_size=n_size_vector,p.value=k)
+
+df %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```

@@ -1,0 +1,204 @@
+--- 
+toc-title: Conteúdo
+---
+
+# Teste da Razão de Verossimilhança
+
+
+## Conceito e forma teórica
+
+O teste de razão de verossimilhança avalia a qualidade do ajuste de dois modelos estatísticos concorrentes com base na razão de suas verossimilhanças, especificamente um encontrado por maximização em todo o espaço de parâmetros e outro encontrado após a imposição de alguma restrição. Se a restrição (ou seja, a hipótese nula) for suportada pelos dados observados, as duas probabilidades não devem diferir em mais do que o erro de amostragem. Assim, o teste da razão de verossimilhança testa se essa razão é significativamente diferente de um ou, de forma equivalente, se seu logaritmo natural é significativamente diferente de zero.
+
+
+A estatísca de teste é dada por:
+
+$$2[l(\hat\theta)-l(\theta_0)]\sim_{n\to\infty}X^2_1$$
+Onde, no caso do modelo $Beta(\alpha,1)$, a estatísca do teste possui a seguinte forma:
+
+$$2[(nlog(\hat\alpha)+\sum(\hat\alpha-1)\ log(x_i))-(nlog(\alpha_0)+\sum(\alpha_0-1)\ log(x_i)]$$
+## Avaliação computacional
+
+```{r,echo=F,warning=FALSE,message=F}
+library(tidyverse)
+library(kableExtra)
+```
+
+```{r, echo=FALSE}
+beta_llhd_function=function(data,alpha){
+  n_size=length(data)
+  
+  out_sum=n_size*log(alpha)
+  in_sum=(alpha-1)*log(data)%>%
+          sum()
+  
+  joint=out_sum+in_sum
+  
+  return(joint)
+}
+
+beta_shape1_mle=function(data){
+  n_size=length(data)
+  numerator=-n_size
+  denominator=log(data)%>%
+                sum()
+  
+  return(numerator/denominator)
+}
+
+
+```
+
+```{r}
+n_size_vector=c(10, 50, 100, 500, 1000, 5000, 10000)
+alpha=5
+alpha_vector=seq(2,8,by=0.2)
+```
+
+
+## Poder do teste 
+
+```{r}
+power_decision=function(x){
+  return(ifelse(x>qchisq(0.975,1) | x<qchisq(0.025,1) ,1,0))
+}
+
+llhood_ratio_test=function(data,H_0){
+  alpha_hat=beta_shape1_mle(data)
+  ll_alpha_hat=beta_llhd_function(data,alpha_hat)
+  
+  ll_alpha_0=beta_llhd_function(data,H_0)
+  
+  llhood_value=2*(ll_alpha_hat-ll_alpha_0)
+  return(llhood_value)
+}
+
+```
+
+
+
+```{r}
+
+llhood_power=sapply(seq_along(n_size_vector),function(i){
+  llhood_power_step=sapply(seq_along(alpha_vector),function(k){replicate(400,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
+    apply(2,llhood_ratio_test,alpha)%>%
+    unlist()%>%
+    sapply(power_decision)%>%
+    sum()/400}
+)
+  return(llhood_power_step)
+
+})
+
+
+```
+
+
+```{r}
+
+tbl_llhood_power=as_tibble(llhood_power)%>%
+                 rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_llhood_power_step=tbl_llhood_power%>%
+  pivot_longer(cols = everything())
+
+
+
+
+index=sapply(seq_along(alpha_vector),function(i){
+      rep(alpha_vector[i],7)
+      })%>%
+      as_tibble()%>%
+      pivot_longer(cols = everything())%>%
+      arrange(value)
+
+pivot_llhood_power=cbind(pivot_llhood_power_step,index$value)%>%
+                    rename('index'='index$value')
+  
+
+ggplot(pivot_llhood_power, aes(x=index, y=value)) +
+  geom_line(linetype=1,linewidth=1.05,color='#FC9B5C')+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+```
+
+
+```{r}
+df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
+df_power_llhood_print=tbl_llhood_power[c(1,6,11,14,15,16,17,18,21,26,31),]
+    
+df=cbind(alpha=df_alpha,df_power_llhood_print)%>%
+  rename('$\\alpha$'=alpha)
+
+
+df %>%
+  kbl(caption = 'Poder em Diferentes Tamanhos Amostrais, $\\alpha$ verdadeiro = 5') %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+### Distribuição Qui-Quadrado assintótica
+
+```{r, warning=F}
+chi_genarate_llhood=sapply(seq_along(n_size_vector),function(i){
+    gen_samples=replicate(1000,rbeta(n=n_size_vector[i],shape1 = 2,shape2 = 1))
+    apply(gen_samples, 2, llhood_ratio_test,2)%>%
+      return()
+  }
+)
+
+tbl_chi_genarate_llhood=as_tibble(chi_genarate_llhood)%>%
+  rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_chi_genarate_llhood=tbl_chi_genarate_llhood%>%
+  pivot_longer(cols = everything())
+
+
+
+
+pivot_chi_genarate_llhood%>% 
+  ggplot(aes(x = value)) + 
+  geom_histogram(aes(y =after_stat(density)),color='black',fill='#FC9B5C')+
+  stat_function(fun = dchisq, args = list(df=1),color='#FA9BEB')+ 
+  ylim(c(0,1))+
+  xlim(c(0,10))+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+
+```
+
+
+```{r}
+
+pivot_chi_genarate_llhood%>% 
+  ggplot(aes(x = value)) + 
+  stat_ecdf(geom = "step",color='#FC9B5C')+
+  stat_function(fun = pchisq, args = list(df=1),color='#FA9BEB')+ 
+  facet_wrap(~name)+
+  theme_dark()
+
+
+```
+
+
+
+
+```{r}
+
+  k=sapply(seq_along(n_size_vector),function(i){
+     ks.test(chi_genarate_llhood[,i],'pchisq',1)$p.value
+  })
+
+
+  
+df=data.frame(N_size=n_size_vector,p.value=k)
+
+df %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```
+
