@@ -1,8 +1,57 @@
+--- 
+toc-title: Conteúdo
+---
+
+
 # Distribuição Beta
 
-## F.D.P F.D.A e aplicações
+## F.D.P e aplicações
+
+Em teoria da probabilidade e estatística, a distribuição beta é uma família de distribuições de probabilidade contínuas definidas no intervalo $[0,1]$ parametrizado por dois parâmetros positivos, denotados por $\alpha$ e $\beta$, que aparecem como expoentes da variável aleatória e controlam o formato da distribuição.
+
+A distribuição beta tem sido aplicada para modelar o comportamento de variáveis aleatórias limitadas a intervalos de tamanho finito em uma grande quantidade de disciplinas.
+
+Em Inferência bayesiana, a distribuição beta é a distribuição conjugada a priori da distribuição de Bernoulli, distribuição binomial, distribuição binomial negativa e distribuição geométrica. Por exemplo, a distribuição beta pode ser usada na análise bayesiana para descrever conhecimentos iniciais sobre a probabilidade de sucesso assim como a probabilidade de que um veículo espacial vai completar uma missão especificada. A distribuição beta é um modelo conveniente para comportamento aleatório de porcentagens e proporções.
+
+Sua **Função Densidade de Probabilidade** é dado por: 
+$$f(x|\alpha,\beta)=\frac{1}{B(\alpha,\beta)}x^{\alpha-1}(1-x)^{\beta-1}$$
+O estudo desenvolvido nesse livro buscou estudar apneas distribuições uniparamétricas, assim, o parametro $\beta$ foi fixado no valor de $1$ para o calculo do **E.M.V e Informação de Fisher** e tambem para as simulações computacionais. Assim, a F.D.P de uma Distribuição $Beta(\alpha,1)$ é dada por:
+$$f(x|\alpha)=\alpha\ x^{\alpha-1}$$
+
+Para o desenvolvimento dos testes, é necessário o calculo do **E.M.V e Informação de Fisher**, onde. Os tópicos a seguir, tais calculos foram feitos e demonstrados
 
 ## Estimador de Verossimilhança
 
+A **Estimador de Verossimilhança** (EMV) é um método de estimar os parâmetros de uma distribuição de probabilidade assumida, dados alguns dados observados. Isso é obtido maximizando uma função de verossimilhança de modo que, sob o modelo estatístico assumido, os dados observados sejam os mais prováveis. O ponto no espaço de parâmetros que maximiza a função de verossimilhança é chamado de estimativa de verossimilhança máxima. A lógica da máxima verossimilhança é intuitiva e flexível e, como tal, o método tornou-se um meio dominante de inferência estatística
+
+
+Dado uma distribuição $Beta(\alpha,1)=\alpha\ x^{\alpha-1}$, tem-se a seguinte função de Verossimilhança:
+
+$$L(\alpha|\tilde{x})=\alpha^n \prod{x_i^{\alpha-1}}$$
+Para facilitar sua maxização, utilizou-se $log(L(\alpha|\tilde{x}))=l(\alpha|\tilde{x})$, dado por:
+
+$$l(\alpha,|\tilde x)=nlog(\alpha)+\sum(\alpha-1)\ log(x_i)$$
+
+Maximando a função:
+
+$$\frac{dl}{d\alpha}=\frac{n}{\alpha}+\sum log(x_i)$$
+
+Portanto:
+$$\hat{\alpha}=\frac{-n}{\sum log(x_i)}$$
+
 ## Informação de Fisher
+
+A Informação de Fisher é uma forma de medir a quantidade de informação que uma variável aleatória observável X carrega sobre um parâmetro desconhecido θ de uma distribuição que modela X. Formalmente, é a variância da pontuação, ou o valor esperado da informação observada.
+
+É dada por: $E((\frac{dl}{d\theta})^2)$ ou $-E(\frac{d^2l}{d\theta^2})$ nos casos em que as condições de regularidade são satisfeitas
+
+A Informação de Fisher da distribuição $Beta(\alpha,1)$ é dada por:
+
+$$\frac{dl}{d\alpha}=\frac{n}{\alpha}+\sum log(x_i)$$
+
+$$\frac{d^2l}{d\alpha^2}=-\frac{n}{\alpha^2}$$
+$$-E(-\frac{n}{\alpha^2})=\frac{n}{\alpha^2}$$
+
+
+
 
