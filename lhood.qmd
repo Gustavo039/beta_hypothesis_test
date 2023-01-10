@@ -10,13 +10,16 @@ toc-title: Conteúdo
 O teste de razão de verossimilhança avalia a qualidade do ajuste de dois modelos estatísticos concorrentes com base na razão de suas verossimilhanças, especificamente um encontrado por maximização em todo o espaço de parâmetros e outro encontrado após a imposição de alguma restrição. Se a restrição (ou seja, a hipótese nula) for suportada pelos dados observados, as duas probabilidades não devem diferir em mais do que o erro de amostragem. Assim, o teste da razão de verossimilhança testa se essa razão é significativamente diferente de um ou, de forma equivalente, se seu logaritmo natural é significativamente diferente de zero.
 
 
-A estatísca de teste é dada por:
+A estatística de teste é dada por:
 
 $$2[l(\hat\theta)-l(\theta_0)]\sim_{n\to\infty}X^2_1$$
-Onde, no caso do modelo $Beta(\alpha,1)$, a estatísca do teste possui a seguinte forma:
+Onde, no caso do modelo $Beta(\alpha,1)$, a estatística do teste possui a seguinte forma:
 
 $$2[(nlog(\hat\alpha)+\sum(\hat\alpha-1)\ log(x_i))-(nlog(\alpha_0)+\sum(\alpha_0-1)\ log(x_i)]$$
-## Avaliação computacional
+
+
+
+## Avaliação Computacional
 
 ```{r,echo=F,warning=FALSE,message=F}
 library(tidyverse)
@@ -124,6 +127,11 @@ ggplot(pivot_llhood_power, aes(x=index, y=value)) +
 ```
 
 
+Ao observar os gráficos, é possivel notar em quais tamanhos amostrais a função poder apresenta uma aparência desejável. Em um tamanho amostral menor que 500, nota-se que o teste apresenta uma alta probabilidade do **Erro do Tipo II**, ou seja, não rejeitar $H_0$ quando $H_0$ é falsa, mesmo quando o $\alpha_0$ testado está distante do $\alpha$ verdadeiro. Em um tamanho amostral igual ou superior a 500, a função passa a apresentar um comportamento melhor, onde a probabilidade de se rejeitar $H_0$, com $H_0$ falsa, vai para 1 e converge para o nivel de significancia de $5\%$ ao se aproximar do $\alpha_0$ verdadeiro. Para o tamanho amostral $10.000$ é observado uma melhor precisão
+
+
+A tabela a seguir apresenta detalhadamente a taxa de rejeição para cada tamanho amostral em $\tilde\alpha=(2,2.2,2.4,2.6,...8)$
+
 ```{r}
 df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
 df_power_llhood_print=tbl_llhood_power[c(1,6,11,14,15,16,17,18,21,26,31),]
@@ -178,6 +186,7 @@ pivot_chi_genarate_llhood%>%
   stat_ecdf(geom = "step",color='#FC9B5C')+
   stat_function(fun = pchisq, args = list(df=1),color='#FA9BEB')+ 
   facet_wrap(~name)+
+  ylim(c(0.92,1))+
   theme_dark()
 
 

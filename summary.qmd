@@ -6,7 +6,7 @@ self-contained: true
 
 # Simulação Computacional dos testes
 
-Trabalhou-se com valores de $\alpha$ como escalar e como vetor em determinados momentos. Para o seu uso escalar fixou-se o valor $1$, ja para $\alpha$
+Trabalhou-se com valores de $\alpha$ como escalar e como vetor em determinados momentos. Para o seu uso escalar fixou-se o valor $5$, ja para $\alpha$
 vetor fixou-se os valores $(1,5,10,50)$ $\tilde{\alpha}$
 
 ```{r,echo=F,warning=F}
@@ -78,8 +78,8 @@ df=cbind('N_size'=n_size_vector,'MLE'=mles,'$\\alpha$'=(mles-2)^2)%>%
    as.data.frame()
 
 df %>%
-  kbl() %>%
-  kable_paper("hover", full_width = F)
+  kbl(caption = 'EMV em Diferentes Tamanhos Amostrais') %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 
@@ -153,12 +153,12 @@ ggplot(pivot_llhood_power, aes(x=index, y=value)) +
 df_alpha=data.frame(alpha=c(2,3,4,5,6,7,8))
 df_power_llhod_print=tbl_llhood_power[c(1,6,11,16,21,26,31),]
     
-df=cbind('$\\alpha$'=df_alpha,df_power_llhod_print)
+df=cbind('$\\alpha$'=df_alpha,df_power_llhod_print)%>%
+   as.data.frame()
 
 df %>%
-  kbl() %>%
-  kable_paper("hover", full_width = F)
-
+  kbl(caption = 'Poder em Diferentes Tamanhos Amostrais') %>%
+  kable_classic(full_width = F, html_font = "Cambria")
 ```
 
 
@@ -252,6 +252,7 @@ df %>%
   kable_paper("hover", full_width = F)
 
 ```
+
 
 ## Teste de Wald
 

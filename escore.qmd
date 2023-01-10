@@ -5,9 +5,26 @@ toc-title: Conteúdo
 # Teste Escore
 
 
+## Conceito e forma teórica
+
+O teste de pontuação avalia restrições em parâmetros estatísticos com base no gradiente da função de verossimilhança — conhecida como pontuação — avaliada no valor do parâmetro hipotético sob a hipótese nula. Intuitivamente, se o estimador restrito estiver próximo do máximo da função de verossimilhança, a pontuação não deve diferir de zero em mais do que o erro amostral. Embora as distribuições de amostras finitas de testes de pontuação sejam geralmente desconhecidas, elas têm uma distribuição $X^2$ assintótica sob a hipótese nula
+
+A estatística do teste é dada por:
+
+$$\frac{U(\theta_0)^2}{I(\theta_0)}\sim_{n\to\infty} X^2_1\text{ ,onde }U(\theta_0)=\frac{dl}{d\theta}$$
+
+
+No caso do modelo $Beta(\alpha,1)$, a estatística do teste possui a seguinte forma:
+
+$$\frac{(\frac{n}{\alpha_0}+\sum log(xi))^2}{\frac{n}{\alpha_0^2}}$$
+
+
+## Avaliação Computacional
+
 ```{r,echo=F,warning=FALSE,message=F}
 library(tidyverse)
 library(kableExtra)
+library(tinytex)
 ```
 
 
@@ -44,6 +61,157 @@ alpha_vector=seq(2,8,by=0.2)
 
 
 
+```{r}
+score_test=function(data,H_0){
+  n_size=length(data)
+  
+  numerator_1=(n_size/H_0)
+  numerator_2=log(data)%>%
+                sum()
+  
+  U_information=numerator_1+numerator_2
+  
+  
+  fisher_information=length(data)/(H_0^2)
+  
+  score_value=(U_information^2)/fisher_information
+  
+  
+  return(score_value)
+  
+  
+}
+```
+
+
+### Poder do teste
+
+```{r}
+
+power_decision=function(x){
+  return(ifelse(x>qchisq(0.975,1) | x<qchisq(0.025,1) ,1,0))
+}
+
+score_power=sapply(seq_along(n_size_vector),function(i){
+  score_power_step=sapply(seq_along(alpha_vector),function(k){replicate(600,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
+    apply(2,score_test,alpha)%>%
+    unlist()%>%
+    sapply(power_decision)%>%
+    sum()/600}
+)
+  return(score_power_step)
+
+})
+
+tbl_score_power=as_tibble(score_power)%>%
+                 rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_score_power_step=tbl_score_power%>%
+  pivot_longer(cols = everything())
+
+
+
+
+index=sapply(seq_along(alpha_vector),function(i){
+      rep(alpha_vector[i],7)
+      })%>%
+      as_tibble()%>%
+      pivot_longer(cols = everything())%>%
+      arrange(value)
+
+pivot_score_power=cbind(pivot_score_power_step,index$value)%>%
+                    rename('index'='index$value')
+  
+
+ggplot(pivot_score_power, aes(x=index, y=value)) +
+  geom_line(linetype=1,linewidth=1.05,color='#FC9B5C')+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+```
+
+
+```{r}
+df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
+df_power_score_print=tbl_score_power[c(1,6,11,14,15,16,17,18,21,26,31),]
+    
+df=cbind(alpha=df_alpha,df_power_score_print)%>%
+  rename('$\\alpha$'=alpha)
+
+
+df %>%
+  kbl(caption = 'Poder em Diferentes Tamanhos Amostrais, $\\alpha$ verdadeiro = 5') %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+
+### Distribuição Qui-Quadrado assintótica
+
+
+```{r}
+chi_genarate_score=sapply(seq_along(n_size_vector),function(i){
+    gen_samples=replicate(5000,rbeta(n=n_size_vector[i],shape1 = alpha,shape2 = 1))
+    apply(gen_samples, 2, score_test,5)%>%
+      return()
+  }
+)
+
+
+
+tbl_chi_genarate_score=as_tibble(chi_genarate_score)%>%
+  rename(N_10=V1,N_50=V2,N_100=V3,N_500=V4,N_1000=V5,N_5000=V6,N_10000=V7)
+
+pivot_chi_genarate_score=tbl_chi_genarate_score%>%
+  pivot_longer(cols = everything())
+
+
+
+
+pivot_chi_genarate_score%>% 
+  ggplot(aes(x = value)) + 
+  geom_histogram(aes(y =after_stat(density)),color='black',fill='#FC9B5C')+
+  stat_function(fun = dchisq, args = list(df=1),color='#FA9BEB')+ 
+  ylim(c(0,1))+
+  xlim(c(0,10))+
+  facet_wrap(~name)+
+  theme_dark()
+
+
+
+
+```
+
+
+```{r}
+
+pivot_chi_genarate_score%>% 
+  ggplot(aes(x = value)) + 
+  stat_ecdf(geom = "step",color='#FC9B5C')+
+  stat_function(fun = pchisq, args = list(df=1),color='#FA9BEB')+ 
+  facet_wrap(~name)+
+  ylim(c(0.92,1))+
+  theme_dark()
+
+
+```
+
+
+```{r}
+
+  k=sapply(seq_along(n_size_vector),function(i){
+     ks.test(tbl_chi_genarate_score[,i],'pchisq',1)$p.value
+  })
+
+
+  
+df=data.frame(N_size=n_size_vector,p.value=k)
+
+df %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+
+```
 
 
 

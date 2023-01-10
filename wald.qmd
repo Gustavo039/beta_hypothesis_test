@@ -8,16 +8,16 @@ toc-title: Conteúdo
 
 O teste avalia restrições em parâmetros estatísticos com base na distância ponderada entre a estimativa irrestrita e seu valor hipotético sob a hipótese nula, onde o peso é a precisão da estimativa. Intuitivamente, quanto maior essa distância ponderada, menos provável é que a restrição seja verdadeira. Embora as distribuições de amostras finitas dos testes de Wald sejam geralmente desconhecidas, ele tem uma distribuição $X^2$ assintótica sob a hipótese nula, um fato que pode ser usado para determinar a significância estatística.
 
-A estatísca de teste é dada por:
+A estatística de teste é dada por:
 
 $$\frac{\sqrt{n}(\hat\theta-\theta_0)}{\sqrt{I_f(\theta)^{-1}}}\sim_{n\to\infty} X^2_1$$
 
-Onde, no caso do modelo $Beta(\alpha,1)$, a estatísca do teste possui a seguinte forma:
+Onde, no caso do modelo $Beta(\alpha,1)$, a estatística do teste possui a seguinte forma:
 
 $$\frac{\sqrt{n}(\hat\alpha-\alpha_0)}{\sqrt{\frac{\hat\alpha^2}{n}}}$$
 
 
-## Avaliação computacional
+## Avaliação Computacional
 
 ```{r,echo=F,warning=FALSE,message=F}
 library(tidyverse)
@@ -178,6 +178,7 @@ pivot_chi_genarate_wald%>%
   stat_ecdf(geom = "step",color='#FC9B5C')+
   stat_function(fun = pchisq, args = list(df=1),color='#FA9BEB')+ 
   facet_wrap(~name)+
+  ylim(c(0.92,1))+
   theme_dark()
 
 
