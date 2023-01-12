@@ -7,7 +7,7 @@ toc-title: Conteúdo
 
 ## Conceito e forma teórica
 
-O teste de razão de verossimilhança avalia a qualidade do ajuste de dois modelos estatísticos concorrentes com base na razão de suas verossimilhanças, especificamente um encontrado por maximização em todo o espaço de parâmetros e outro encontrado após a imposição de alguma restrição. Se a restrição (ou seja, a hipótese nula) for suportada pelos dados observados, as duas probabilidades não devem diferir em mais do que o erro de amostragem. Assim, o teste da razão de verossimilhança testa se essa razão é significativamente diferente de um ou, de forma equivalente, se seu logaritmo natural é significativamente diferente de zero.
+O teste de razão de verossimilhança avalia a qualidade do ajuste de dois modelos estatísticos concorrentes com base na razão de suas verossimilhanças, especificamente um encontrado por maximização em todo o espaço de parâmetros e outro encontrado após a imposição de alguma restrição. Se a restrição (ou seja, a hipótese nula) for suportada pelos dados observados, as duas probabilidades não devem diferir em mais do que o erro de amostragem. Assim, o teste da razão de verossimilhança testa se essa razão é significativamente diferente de um ou, de forma equivalente, se seu logaritmo natural é significativamente diferente de zero. [@king1989unifying]
 
 
 A estatística de teste é dada por:
@@ -51,6 +51,7 @@ beta_shape1_mle=function(data){
 
 ```
 
+
 ```{r}
 n_size_vector=c(10, 50, 100, 500, 1000, 5000, 10000)
 alpha=5
@@ -58,7 +59,20 @@ alpha_vector=seq(2,8,by=0.2)
 ```
 
 
-## Poder do teste 
+```{r}
+llhood_ratio_test=function(data,H_0){
+  alpha_hat=beta_shape1_mle(data)
+  ll_alpha_hat=beta_llhd_function(data,alpha_hat)
+  
+  ll_alpha_0=beta_llhd_function(data,H_0)
+  
+  llhood_value=2*(ll_alpha_hat-ll_alpha_0)
+  return(llhood_value)
+}
+```
+
+
+### Poder do teste 
 
 ```{r}
 power_decision=function(x){
@@ -82,11 +96,11 @@ llhood_ratio_test=function(data,H_0){
 ```{r}
 
 llhood_power=sapply(seq_along(n_size_vector),function(i){
-  llhood_power_step=sapply(seq_along(alpha_vector),function(k){replicate(400,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
+  llhood_power_step=sapply(seq_along(alpha_vector),function(k){replicate(600,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
     apply(2,llhood_ratio_test,alpha)%>%
     unlist()%>%
     sapply(power_decision)%>%
-    sum()/400}
+    sum()/600}
 )
   return(llhood_power_step)
 
@@ -136,7 +150,7 @@ A tabela a seguir apresenta detalhadamente a taxa de rejeição para cada tamanh
 df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
 df_power_llhood_print=tbl_llhood_power[c(1,6,11,14,15,16,17,18,21,26,31),]
     
-df=cbind(alpha=df_alpha,df_power_llhood_print)%>%
+df=cbind(alpha=df_alpha,round(df_power_llhood_print,3))%>%
   rename('$\\alpha$'=alpha)
 
 

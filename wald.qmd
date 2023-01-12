@@ -6,7 +6,7 @@ toc-title: Conteúdo
 
 ## Conceito e forma teórica
 
-O teste avalia restrições em parâmetros estatísticos com base na distância ponderada entre a estimativa irrestrita e seu valor hipotético sob a hipótese nula, onde o peso é a precisão da estimativa. Intuitivamente, quanto maior essa distância ponderada, menos provável é que a restrição seja verdadeira. Embora as distribuições de amostras finitas dos testes de Wald sejam geralmente desconhecidas, ele tem uma distribuição $X^2$ assintótica sob a hipótese nula, um fato que pode ser usado para determinar a significância estatística.
+O teste avalia restrições em parâmetros estatísticos com base na distância ponderada entre a estimativa irrestrita e seu valor hipotético sob a hipótese nula, onde o peso é a precisão da estimativa. Intuitivamente, quanto maior essa distância ponderada, menos provável é que a restrição seja verdadeira. Embora as distribuições de amostras finitas dos testes de Wald sejam geralmente desconhecidas, ele tem uma distribuição $X^2$ assintótica sob a hipótese nula, um fato que pode ser usado para determinar a significância estatística. [@ward2018maximum]
 
 A estatística de teste é dada por:
 
@@ -81,11 +81,11 @@ power_decision=function(x){
 }
 
 wald_power=sapply(seq_along(n_size_vector),function(i){
-  wald_power_step=sapply(seq_along(alpha_vector),function(k){replicate(400,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
+  wald_power_step=sapply(seq_along(alpha_vector),function(k){replicate(600,rbeta(n=n_size_vector[i],shape1 = alpha_vector[k],shape2 = 1))%>%
     apply(2,wald_test,alpha)%>%
     unlist()%>%
     sapply(power_decision)%>%
-    sum()/400}
+    sum()/600}
 )
   return(wald_power_step)
 
@@ -119,12 +119,17 @@ ggplot(pivot_wald_power, aes(x=index, y=value)) +
 
 ```
 
+Ao observar os gráficos, é possivel notar em quais tamanhos amostrais a função poder apresenta uma aparência desejável. Em um tamanho amostral menor que 500, nota-se que o teste apresenta uma alta probabilidade do **Erro do Tipo II**, ou seja, não rejeitar $H_0$ quando $H_0$ é falsa, mesmo quando o $\alpha_0$ testado está distante do $\alpha$ verdadeiro. Em um tamanho amostral igual ou superior a 500, a função passa a apresentar um comportamento melhor, onde a probabilidade de se rejeitar $H_0$, com $H_0$ falsa, vai para 1 e converge para o nivel de significancia de $5\%$ ao se aproximar do $\alpha_0$ verdadeiro. Para o tamanho amostral $10.000$ é observado uma melhor precisão
+
+
+A tabela a seguir apresenta detalhadamente a taxa de rejeição para cada tamanho amostral em $\tilde\alpha=(2,2.2,2.4,2.6,...8)$
+
 
 ```{r}
 df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
 df_power_wald_print=tbl_wald_power[c(1,6,11,14,15,16,17,18,21,26,31),]
     
-df=cbind(alpha=df_alpha,df_power_wald_print)%>%
+df=cbind(alpha=df_alpha,round(df_power_wald_print,3))%>%
   rename('$\\alpha$'=alpha)
 
 

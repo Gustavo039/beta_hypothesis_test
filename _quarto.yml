@@ -20,6 +20,7 @@ book:
     - lhood.qmd
     - wald.qmd
     - escore.qmd
+    - best_test.qmd
     - references.qmd
 
 bibliography: references.bib

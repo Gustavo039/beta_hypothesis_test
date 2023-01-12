@@ -7,7 +7,7 @@ toc-title: Conteúdo
 
 ## Conceito e forma teórica
 
-O teste de pontuação avalia restrições em parâmetros estatísticos com base no gradiente da função de verossimilhança — conhecida como pontuação — avaliada no valor do parâmetro hipotético sob a hipótese nula. Intuitivamente, se o estimador restrito estiver próximo do máximo da função de verossimilhança, a pontuação não deve diferir de zero em mais do que o erro amostral. Embora as distribuições de amostras finitas de testes de pontuação sejam geralmente desconhecidas, elas têm uma distribuição $X^2$ assintótica sob a hipótese nula
+O teste de pontuação avalia restrições em parâmetros estatísticos com base no gradiente da função de verossimilhança — conhecida como pontuação — avaliada no valor do parâmetro hipotético sob a hipótese nula. Intuitivamente, se o estimador restrito estiver próximo do máximo da função de verossimilhança, a pontuação não deve diferir de zero em mais do que o erro amostral. Embora as distribuições de amostras finitas de testes de pontuação sejam geralmente desconhecidas, elas têm uma distribuição $X^2$ assintótica sob a hipótese nula. [@silvey1959lagrangian]
 
 A estatística do teste é dada por:
 
@@ -132,11 +132,16 @@ ggplot(pivot_score_power, aes(x=index, y=value)) +
 ```
 
 
+Ao observar os gráficos, é possivel notar em quais tamanhos amostrais a função poder apresenta uma aparência desejável. Em um tamanho amostral menor que 500, nota-se que o teste apresenta uma alta probabilidade do **Erro do Tipo II**, ou seja, não rejeitar $H_0$ quando $H_0$ é falsa, mesmo quando o $\alpha_0$ testado está distante do $\alpha$ verdadeiro. Em um tamanho amostral igual ou superior a 500, a função passa a apresentar um comportamento melhor, onde a probabilidade de se rejeitar $H_0$, com $H_0$ falsa, vai para 1 e converge para o nivel de significancia de $5\%$ ao se aproximar do $\alpha_0$ verdadeiro. Para o tamanho amostral $10.000$ é observado uma melhor precisão
+
+
+A tabela a seguir apresenta detalhadamente a taxa de rejeição para cada tamanho amostral em $\tilde\alpha=(2,2.2,2.4,2.6,...8)$
+
 ```{r}
 df_alpha=data.frame(alpha=c(2,3,4,4.6,4.8,5,5.2,5.4,6,7,8))
 df_power_score_print=tbl_score_power[c(1,6,11,14,15,16,17,18,21,26,31),]
     
-df=cbind(alpha=df_alpha,df_power_score_print)%>%
+df=cbind(alpha=df_alpha,round(df_power_score_print,3))%>%
   rename('$\\alpha$'=alpha)
 
 
